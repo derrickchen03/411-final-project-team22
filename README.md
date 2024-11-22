@@ -3,9 +3,11 @@ For CS411 F24 @ BU
 
 Needs to have this at some point:
 
-What the application does at a high level
+
+● What the application does at a high level
 
 ● A description of each route (example on ed discussion):
+
     ○ Route Name and Path
     ○ Request Type
         ■ GET, POST, PUT, DELETE
