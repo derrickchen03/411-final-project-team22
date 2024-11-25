@@ -97,5 +97,15 @@ def login(entered_username: str, password: str) -> str:
         logger.error("Database error: %s", str(e))
         raise e
 
-def update_password() -> None:
-    pass
+def update_password(username: str, new_pass: str) -> None:
+    """ """
+    if not isinstance(username, (str)):
+        raise ValueError(f"Invalid username: {username}. Username must be a string.")
+    
+    try:
+        if track_number < 1 or track_number > self.get_playlist_length():
+            logger.error("Invalid track number %d", track_number)
+            raise ValueError(f"Invalid track number: {track_number}")
+    except ValueError:
+        logger.error("Invalid track number %s", track_number)
+        raise ValueError(f"Invalid track number: {track_number}")
