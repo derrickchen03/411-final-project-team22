@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import logging
 import sqlite3
 from typing import Any
+import requests
 
 from account_model import User
 
@@ -18,6 +19,9 @@ def add_favorite(user_id: int, location: str) -> None:
         user_id (int): the id for the user currently logged in.
         location (str): the location to be added to the favorites.
     """
+    
+
+
     pass
 
 def get_favorite_weather(user_id: int, favorite: str) -> dict:
@@ -31,6 +35,9 @@ def get_favorite_weather(user_id: int, favorite: str) -> dict:
     Returns: 
         dict: a dictionary containing the realtime weather for the favorite location.
     """
+    url = f'http://api.weatherapi.com/v1/current.json?key={KEY_VALUE}&q={favorite}'
+    response = requests.get(url)
+    
     pass
 
 def get_all_favorites_current_weather(user_id: int) -> list[dict]:
