@@ -33,7 +33,7 @@ class MongoSessionModel:
             # Clear any previous favorites in the model
             favorites.clear()
             for favorite in session.get("favorites", {}):
-                #call api???
+                favorite.get_favorite_weather()
                 pass
         else:
             sessions_collection.insert_one({"user_id": user_id, "favorites": {}})
