@@ -1,16 +1,45 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
+from sqlalchemy.sql import text
+import sqlite3
+from db import db
+import requests
+import os
 
-from weather.models.account_model import User
-from weather.models.favorites_manager import FavoritesManager
+if not os.path.exists('db'):
+    os.makedirs('db')
+    print("Created db directory.")
 
 # Load environment variables from .env file
 load_dotenv()
+api_key = os.getenv("API_KEY")
+weather_api = "http://api.weatherapi.com/v1"
 
+# Initialize SQLLite SQLAlchemy DB through Flask
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 
-favorites_manager = FavoritesManager()
+#from weather.models.account_model import User
+#from weather.models.favorites_manager import FavoritesManager
 
+#favorites_manager = FavoritesManager()
+
+class User(db.Model):
+    __tablename__ = 'users'  # Table name in the database
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+
+with app.app_context():
+    try:
+        conn = sqlite3.connect('db/users.db')
+        db.create_all()
+        conn.close()
+    except Exception as e:
+        print(e)
+        
 ####################################################
 #
 # Healthchecks
@@ -25,71 +54,35 @@ def healthcheck() -> Response:
     Returns:
         JSON response indicating the health status of the service.
     """
-    app.logger.info('Health check')
-    return make_response(jsonify({'status': 'healthy'}), 200)
-
-##########################################################
-#
-# Favorites Management
-#
-##########################################################
-
-@app.route('/api/add-favorite', methods=['POST'])
-def add_favorite() -> Response:
-    """
-    Route to add a favorite to user's list of favorites.
-
-    Expected JSON Input:
-        - user_id (int): the id for the user currently logged in.
-        - location (str): the location to be added to the favorites.
-
-    Returns:
-    JSON response indicating the success of the favorite addition.
-    """
-    app.logger.info("Adding a new favorite to list of user's favorites")
-
-
-@app.route('/api/clear-favorites/<int:user_id>', methods=['DELETE'])
-def clear_favorites(user_id: int) -> Response:
-    """
-    Route to clear the dictionary of the user's favorite weather locations.
-    
-    Path Parameter:
-        - user_id (int): the id for the user currently logged in.
-    Returns:
-        JSON response indicuating success of the operation or error message.
-    """
-    try: 
-        app.logger.info("Clearing weather favorites of user {user_id}" )
-        favorites_manager.clear_favorites(user_id, favorites_manager.favorites)
-        return make_response(jsonify({'status': 'success'}), 200)
+    app.logger.info('Initiating Health check')
+    try:
+        query = {"key": api_key, "q": "London"}
+        response = requests.get(weather_api + "/current.json", params = query, timeout = 5)
+        if response.status_code == 200:
+            return make_response(jsonify({'status': 'healthy'}), 200)
+        else:
+            return make_response(jsonify({'status': 'failed'}), 503)
     except Exception as e:
-        app.logger.error(f"Error clearing favorites: {e}")
-        return make_response(jsonify({'error': str(e)}), 500)
+        return make_response(jsonify({'status': 'failed'}), 503)
     
-@app.route('/api/get-favorite-weather/<int:user_id>', methods=['GET'])
-def get_weather(user_id: int) -> Response:
+@app.route('/api/db-check', methods=['GET'])
+def db_check() -> Response:
     """
-    Route to get the weather of a favorite location
+    Route to check if the database connection and meals table are functional.
 
-    Path Parameter: 
-        - user_id (int): the id for the user currently logged in.
+    Returns:
+        JSON response indicating the database health status.
+    Raises:
+        404 error if there is an issue with the database.
     """
-
-@app.route('/api/get-all-favorites-current-weather/<int:user_id>', methods=['GET'])
-def get_all_favorites_weather(user_id: int) -> Response:
-    """
-    Route to get the temperature for all the user's favorite locations.
-    """
-
-@app.route('/api/get-all-favorites/<int:user_id>', method=['GET'])
-def get_all_favorites(user_id: int) -> Response:
-    """
-    Route to get all the favorite locations of the user.
-    """
-
-@app.route('/api/get-favorite-historical/<int:user_id>',  method=['GET'])
-def get_favorite_historical(user_id: int) -> Response:
-    """"
-    Route to get the historical temperature, wind, precipitation, and humidity for a favorite location.
-    """
+    app.logger.info("Checking database connection...")
+    try:
+        db.session.execute(text("SELECT 1"))
+        app.logger.info("Database connection is OK.")
+        return make_response(jsonify({'database_status': 'healthy'}), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 404)
+    
+if __name__ == '__main__':
+    app.run(debug=True)
+    
