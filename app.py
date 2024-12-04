@@ -11,6 +11,23 @@ app = Flask(__name__)
 
 favorites_manager = FavoritesManager()
 
+####################################################
+#
+# Healthchecks
+#
+####################################################
+
+@app.route('/api/health', methods=['GET'])
+def healthcheck() -> Response:
+    """
+    Health check route to verify the service is running.
+
+    Returns:
+        JSON response indicating the health status of the service.
+    """
+    app.logger.info('Health check')
+    return make_response(jsonify({'status': 'healthy'}), 200)
+
 ##########################################################
 #
 # Favorites Management
@@ -32,7 +49,7 @@ def add_favorite() -> Response:
     app.logger.info("Adding a new favorite to list of user's favorites")
 
 
-@app.route('/api/clear-favorites', methods=['DELETE'])
+@app.route('/api/clear-favorites/<int:user_id>', methods=['DELETE'])
 def clear_favorites(user_id: int) -> Response:
     """
     Route to clear the dictionary of the user's favorite weather locations.
@@ -50,3 +67,29 @@ def clear_favorites(user_id: int) -> Response:
         app.logger.error(f"Error clearing favorites: {e}")
         return make_response(jsonify({'error': str(e)}), 500)
     
+@app.route('/api/get-favorite-weather/<int:user_id>', methods=['GET'])
+def get_weather(user_id: int) -> Response:
+    """
+    Route to get the weather of a favorite location
+
+    Path Parameter: 
+        - user_id (int): the id for the user currently logged in.
+    """
+
+@app.route('/api/get-all-favorites-current-weather/<int:user_id>', methods=['GET'])
+def get_all_favorites_weather(user_id: int) -> Response:
+    """
+    Route to get the temperature for all the user's favorite locations.
+    """
+
+@app.route('/api/get-all-favorites/<int:user_id>', method=['GET'])
+def get_all_favorites(user_id: int) -> Response:
+    """
+    Route to get all the favorite locations of the user.
+    """
+
+@app.route('/api/get-favorite-historical/<int:user_id>',  method=['GET'])
+def get_favorite_historical(user_id: int) -> Response:
+    """"
+    Route to get the historical temperature, wind, precipitation, and humidity for a favorite location.
+    """
