@@ -92,5 +92,36 @@ def add_user() -> Response:
         if User.query.filter_by(username=username).first():
             return make_response(jsonify({'error': 'Invalid username, username already taken'}), 400)
         User.create_user(username, password)
+        return make_response(jsonify({'status': 'success', 'username': username}), 200)
     except:
         return make_response(jsonify({"error": "An error occurred while creating the user"}), 500)
+
+@app.route('/api/remove-user', methods=['DELETE'])
+def remove_user() -> Response:
+    app.logger.info('Deleting current user')
+
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        if not User.query.filter_by(username=username).first():
+            return make_response(jsonify({'error': 'Invalid username, user does not exist'}), 400)
+        User.delete_user(username)
+        return make_response(jsonify({'status': 'success', 'username': username}), 200)
+    except:
+        return make_response(jsonify({"error": "An error occurred while deleting the user"}), 500)
+
+@app.route('/api/change-password', methods=['POST'])
+def change_password() -> Response:
+    app.logger.info('Changing user password')
+
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        if not User.query.filter_by(username=username).first():
+            return make_response(jsonify({'error': 'Invalid username, user does not exist'}), 400)
+        User.update_password(username, password)
+        return make_response(jsonify({'status': 'success', 'username': username}), 200)
+    except:
+        return make_response(jsonify({"error": "An error occurred while updating the password"}), 500)
+    
