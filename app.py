@@ -6,10 +6,6 @@ from db import db
 import requests
 import os
 
-if not os.path.exists('db'):
-    os.makedirs('db')
-    print("Created db directory.")
-
 # Load environment variables from .env file
 load_dotenv()
 api_key = os.getenv("API_KEY")
@@ -17,26 +13,19 @@ weather_api = "http://api.weatherapi.com/v1"
 
 # Initialize SQLLite SQLAlchemy DB through Flask
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URI")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-#from weather.models.account_model import User
+from weather.models.account_model import User
 #from weather.models.favorites_manager import FavoritesManager
 
 #favorites_manager = FavoritesManager()
 
-class User(db.Model):
-    __tablename__ = 'users'  # Table name in the database
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
 
 with app.app_context():
     try:
-        conn = sqlite3.connect('db/users.db')
         db.create_all()
-        conn.close()
     except Exception as e:
         print(e)
         
@@ -86,3 +75,22 @@ def db_check() -> Response:
 if __name__ == '__main__':
     app.run(debug=True)
     
+####################################################
+#
+# Add User
+#
+####################################################
+
+@app.route('/api/add-user', methods=['POST'])
+def add_user() -> Response:
+    app.logger.info('Adding new user')
+
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        if User.query.filter_by(username=username).first():
+            return make_response(jsonify({'error': 'Invalid username, username already taken'}), 400)
+        User.create_user(username, password)
+    except:
+        return make_response(jsonify({"error": "An error occurred while creating the user"}), 500)
