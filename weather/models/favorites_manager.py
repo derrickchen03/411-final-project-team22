@@ -88,7 +88,7 @@ class FavoritesManager:
         """
         pass
 
-    def get_favorite_historical(user_id: int, favorite: str) -> dict: #History Object returned by the api
+    def get_favorite_historical(user_id: int, favorite: str) -> dict: 
         """
         Get the historical temperature, wind, precipitation, and humidity for a favorite location.
 
