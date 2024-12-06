@@ -2,11 +2,6 @@ from dataclasses import dataclass
 import logging
 import sqlite3
 from typing import Any
-#import requests
-#from dotenv import load_dotenv
-#import os
-
-from account_model import User
 
 from utils.logger import configure_logger
 
@@ -88,29 +83,42 @@ class FavoritesManager:
         
         return temps
 
-    def get_all_favorites(user_id: int) -> list[str]:
+    def get_all_favorites(self) -> list[str]:
         """
         Get a list of all the favorite locations the user has saved.
-
-        Args:
-            user_id (int): the ID of the user currently logged in.
 
         Returns:
             list[str]: a list of the favorite locations saved by the user.
         """
-        pass
+        fav_locations = []
 
-    def get_favorite_historical(user_id: int, favorite: str) -> dict: 
+        for location in self.favorites:
+            fav_locations.append(location)
+        
+        return fav_locations
+
+    def get_favorite_historical(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> dict: 
         """
         Get the historical temperature, wind, precipitation, and humidity for a favorite location.
 
         Args:
-            user_id (int): the ID of the user currently logged in.
-            favorite (str): the location of the historical weather to be retrieved.
+            location (str): the location to be added to the favorites.
+            temp (float): the location's temperature in Farenheit.
+            wind (float): the location's wind speed in miles per hour.
+            precipitation (float): the location's precipitation in inches.
+            humidity (int): the location's humidity.
 
         Returns:
             dict: a dictionary containing the historical weather for the favorite location.
+
+        Raises:
+            ValueError: if the location has not be saved in favorites.
         """
-        pass
+        if location in self.favorites:
+            weather = {'temp': temp, 'wind': wind, 'precipitation': precipitation, 'humidity': humidity}
+            return weather
+        else:
+            raise ValueError(f"{location} not found in Favorites.")
     
-    def get_favorites_forecast_5_days(self, location: str) -> 
+    def get_favorites_forecast_5_days(self, location: str) -> dict:
+        pass
