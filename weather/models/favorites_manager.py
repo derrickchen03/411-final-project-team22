@@ -2,7 +2,9 @@ from dataclasses import dataclass
 import logging
 import sqlite3
 from typing import Any
-import requests
+#import requests
+#from dotenv import load_dotenv
+#import os
 
 from account_model import User
 
@@ -23,18 +25,21 @@ class FavoritesManager:
         """Initializes the FavoritesManager with an empty list of favorites."""
         self.favorites: dict[str, Any] = {}  # dictionary of favorite locations
 
-    def add_favorite(user_id: int, location: str) -> None:
+    def add_favorite(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> None:
         """
         Add a new favorite by the location to the user's favorites.
 
         Args:
-            user_id (int): the id for the user currently logged in.
             location (str): the location to be added to the favorites.
+            temp (float): the location's temperature in Farenheit.
+            wind (float): the location's wind speed in miles per hour.
+            precipitation (float): the location's precipitation in inches.
+            humidity (int): the location's humidity.
         """
         
-
-
-        pass
+        logger.info("Adding weather for %s to favorites.", location)
+        self.favorites[location] = {'temp': temp, 'wind': wind, 'precipitation': precipitation, 'humidity': humidity}
+        return
 
     def clear_favorites(user_id: int, favorites: dict) -> None:
         """
@@ -48,7 +53,7 @@ class FavoritesManager:
         favorites.clear()
 
 
-    def get_favorite_weather(user_id: int, favorite: str) -> dict:
+    def get_favorite_weather(self, favorite_loc: str) -> dict:
         """
         Get the realtime temperature, wind, precipitation, and humidity for a favorite location. 
 
@@ -58,23 +63,30 @@ class FavoritesManager:
 
         Returns: 
             dict: a dictionary containing the realtime weather for the favorite location.
-        """
-        url = f'http://api.weatherapi.com/v1/current.json?key={KEY_VALUE}&q={favorite}'
-        response = requests.get(url)
         
-        pass
+        Raises:
+            ValueError: if the location has not been saved in the Favorites dictionary.
+        """
+        
+        logger.info("retrieving weather from %s.", favorite_loc)
 
-    def get_all_favorites_current_weather(user_id: int) -> list[dict]:
+        if favorite_loc in self.favorites:
+            return self.favorites[favorite_loc]
+        else:
+            raise ValueError(f"{favorite_loc} not found in Favorites.")
+
+    def get_all_favorites_current_weather(self) -> list[dict]:
         """
         Get the temperature for all of the user's favorite locations.
-
-        Args:
-            user_id (int): the ID of the user that's logged in
 
         Returns:
             list[dict]: a list of dictionaries containing the location and the temperature for that location.
         """
-        pass
+        temps = {}
+        for location in self.favorites:
+            temps[location] = self.favorites[location]["temp"]
+        
+        return temps
 
     def get_all_favorites(user_id: int) -> list[str]:
         """
@@ -100,3 +112,5 @@ class FavoritesManager:
             dict: a dictionary containing the historical weather for the favorite location.
         """
         pass
+    
+    def get_favorites_forecast_5_days(self, location: str) -> 
