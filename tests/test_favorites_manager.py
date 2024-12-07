@@ -1,11 +1,11 @@
 import pytest
 
-from weather.models.favorites_manager import FavoritesManager
+from weather.models.favorites_manager import FavoritesModel
 
 @pytest.fixture
-def favorites_manager():
-    """Fixture to provide a new instance of FavoritesManager for each test."""
-    return FavoritesManager()
+def favorites_model():
+    """Fixture to provide a new instance of FavoritesModel for each test."""
+    return FavoritesModel()
 
 # Fixture providing a sample favorites dictionary
 @pytest.fixture
@@ -28,6 +28,9 @@ def sample_favorites():
 
 def test_add_favorite():
     """testing adding a location to the favorites dictionary."""
+    favorites_model.add_favorite("Boston", 32.0, 12.0, 3.5, 20)
+    assert len(favorites_model.favorites) == 1
+    assert favorites_model.favorites[0] == 'Boston'
     pass
 
 def test_add_favorite_invalid_temp():

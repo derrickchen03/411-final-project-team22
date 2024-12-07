@@ -2,13 +2,14 @@ from dataclasses import dataclass
 import logging
 import sqlite3
 from typing import Any
+import requests
 
 from utils.logger import configure_logger
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
-class FavoritesManager:
+class FavoritesModel:
     """
     A class to manage the user's favorites.
 
@@ -17,7 +18,7 @@ class FavoritesManager:
     """
 
     def __init__(self):
-        """Initializes the FavoritesManager with an empty list of favorites."""
+        """Initializes the FavoritesModel with an empty list of favorites."""
         self.favorites: dict[str, Any] = {}  # dictionary of favorite locations
 
     def add_favorite(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> None:
@@ -34,6 +35,10 @@ class FavoritesManager:
         Raises:
             ValueError: if the temp, wind, or precipitation are not floats.
         """
+        url = f'http://api.weatherapi.com/v1/current.json?key={KEY_VALUE}&q={location}'
+        response = requests.get(url)
+        
+
         if not isinstance(temp, float):
             raise ValueError(f"Invalid temperature: {temp}, should be a float.")
         if not isinstance(wind, float):
