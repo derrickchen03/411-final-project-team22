@@ -3,8 +3,14 @@ import logging
 import sqlite3
 from typing import Any
 import requests
+import os
 
 from utils.logger import configure_logger
+
+# Load environment variables from .env file
+load_dotenv()
+api_key = os.getenv("API_KEY")
+weather_api = "http://api.weatherapi.com/v1"
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
@@ -21,6 +27,31 @@ class FavoritesModel:
         """Initializes the FavoritesModel with an empty list of favorites."""
         self.favorites: dict[str, Any] = {}  # dictionary of favorite locations
 
+    def get_weather_api(self, location):
+        """
+        Get the current weather for a location.
+
+        Args:
+            location (str): the location to retrieve the weather for.
+        
+        Return:
+            temp (float): the location's temperature in Farenheit.
+            wind (float): the location's wind in mph.
+            precipitation (float): the location's preciptation in inches.
+            humidity (int): the location's humidity.
+        """
+        # call the current weather api
+        url = f'{weather_api}/current.json?key={api_key}&q={location}'
+        response = requests.get(url)
+
+        # parse through the response to get the values we will save.
+        weather = response.json()['current']
+        temp = weather['temp_f']
+        wind = weather['wind_mph']
+        precipitation = weather['precip_in']
+        humidity = weather['humidity']
+        return temp, wind, precipitation, humidity
+
     def add_favorite(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> None:
         """
         Add a new favorite by the location to the user's favorites.
@@ -35,8 +66,7 @@ class FavoritesModel:
         Raises:
             ValueError: if the temp, wind, or precipitation are not floats.
         """
-        url = f'http://api.weatherapi.com/v1/current.json?key={KEY_VALUE}&q={location}'
-        response = requests.get(url)
+        
         
 
         if not isinstance(temp, float):

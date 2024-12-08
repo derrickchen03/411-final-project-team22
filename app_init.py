@@ -18,9 +18,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 from weather.models.account_model import User
-#from weather.models.favorites_manager import FavoritesManager
+from weather.models.favorites_manager import FavoritesManager
 
-#favorites_manager = FavoritesManager()
+favorites_manager = FavoritesManager()
 
 
 with app.app_context():
@@ -125,3 +125,46 @@ def change_password() -> Response:
     except:
         return make_response(jsonify({"error": "An error occurred while updating the password"}), 500)
     
+@app.route('/api/add-favorite', methods=['POST'])
+def add_favorite() -> Response:
+    """
+    Route to add a new location to the favorites dictionary.
+
+    Expected JSON Input:
+        - location (str): the location whose weather will be retrieved.
+
+    Returns:
+        JSON response indicating the success of the location addition.
+    Raises:
+        400 error if input validation fails.
+        500 error if there is an issue adding the location to favorites.
+    """
+    app.logger.info('Adding a location to favorites')
+
+    try:
+        data = request.get_json()
+        location = data.get('location')
+        
+        if not location:
+            return make_response(jsonify({'error': 'Invalid input, all fields are required with valid values'}), 400)
+
+        # Check that location is a string
+        try:
+            location = str(location)
+        except ValueError as e:
+            return make_response(jsonify({'error': 'Location must be a string'}), 400)
+
+        # Call the get_weather function to call the api and retrieve the weather
+        app.logger.info('Getting weather for %s', location)
+        temp, wind, precipitation, humidity = favorites_manager.get_weather(location)
+
+        # Call the add_favorites function to add the location and its current weather to the favorites dictionary
+        app.logger.info('Adding location and weather to favorites')
+        favorites_manager.add_favorite(location, temp, wind, precipitation, humidity)
+
+        app.logger.info("Location added: %s", location)
+        return make_response(jsonify({'status': 'success', 'location': location}), 200)
+    
+    except Exception as e:
+        app.logger.error("Failed to add favorite: %s", str(e))
+        return make_response(jsonify({'error': str(e)}), 500)
