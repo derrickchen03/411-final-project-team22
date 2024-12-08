@@ -1,9 +1,17 @@
 from dataclasses import dataclass
+from dotenv import load_dotenv
+import json
 import logging
 import sqlite3
 from typing import Any
-
+import requests
+import os
+from datetime import datetime, timedelta
 from utils.logger import configure_logger
+
+load_dotenv()
+api_key = os.getenv("API_KEY")
+weather_api = "http://api.weatherapi.com/v1"
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
@@ -18,9 +26,9 @@ class FavoritesManager:
 
     def __init__(self):
         """Initializes the FavoritesManager with an empty list of favorites."""
-        self.favorites: dict[str, Any] = {}  # dictionary of favorite locations
+        self.favorites: dict[str, dict[str, Any]] = {}  # dictionary of favorite locations
 
-    def add_favorite(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> None:
+    def add_favorite(self, location: str, temp: float = None, wind: float = None, precipitation: float = None, humidity: int = None) -> None:
         """
         Add a new favorite by the location to the user's favorites.
 
@@ -66,21 +74,42 @@ class FavoritesManager:
         logger.info("retrieving weather from %s.", favorite_loc)
 
         if favorite_loc in self.favorites:
-            return self.favorites[favorite_loc]
+            try:
+                query = {"key": api_key, "q": f"{favorite_loc}"}
+                response = requests.get(weather_api + "/current.json", params = query)
+                if response.get_status != 200:
+                    return {'status': 'failed', 'error': '1006', 'message': 'location not found'}
+                else:
+                    parsed = json.loads(response)
+                    self.favorites[favorite_loc]['temp'] = parsed['current']['temp_f']
+                    self.favorites[favorite_loc]['wind'] = parsed['current']['wind_mph']
+                    self.favorites[favorite_loc]['precipitation'] = parsed['current']['precip_in']
+                    self.favorites[favorite_loc]['humidity'] = parsed['current']['humidity']
+                return self.favorites[favorite_loc]
+            except:
+                return {'status': 'failed', 'error': 400, 'message': 'error occurred when retrieving loc'}
         else:
             raise ValueError(f"{favorite_loc} not found in Favorites.")
 
     def get_all_favorites_current_weather(self) -> list[dict]:
         """
-        Get the temperature for all of the user's favorite locations.
+        Get the temperature data for all of the user's favorite locations.
 
         Returns:
-            list[dict]: a list of dictionaries containing the location and the temperature for that location.
+            list[dict]: a list of dictionaries containing the locations and the temperature for that location.
         """
         temps = {}
         for location in self.favorites:
-            temps[location] = self.favorites[location]["temp"]
-        
+            try:
+                query = {"key": api_key, "q": f"{location}"}
+                response = requests.get(weather_api + "/current.json", params = query)
+                if response.get_status != 200:
+                    return {'status': 'failed', 'error': '1006', 'message': 'location not found'}
+                else:
+                    parsed = json.loads(response)
+                    temps[location] = parsed['current']['temp_f']
+            except:
+                return {'status': 'failed', 'error': 400, 'message': 'error occurred when retrieving location'}
         return temps
 
     def get_all_favorites(self) -> list[str]:
@@ -99,7 +128,7 @@ class FavoritesManager:
 
     def get_favorite_historical(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> dict: 
         """
-        Get the historical temperature, wind, precipitation, and humidity for a favorite location.
+        Get the historical temperature, wind, precipitation, and humidity for a favorite location, for up to 5 days in the past, not including current.
 
         Args:
             location (str): the location to be added to the favorites.
@@ -114,11 +143,14 @@ class FavoritesManager:
         Raises:
             ValueError: if the location has not be saved in favorites.
         """
+        five_days_ago = datetime.now() - timedelta(days=5)
         if location in self.favorites:
             weather = {'temp': temp, 'wind': wind, 'precipitation': precipitation, 'humidity': humidity}
             return weather
         else:
             raise ValueError(f"{location} not found in Favorites.")
+    
+# CANT DO THIS WITHOUT PREMIUM API, someone else subscribe?
     
     def get_favorites_forecast_5_days(self, location: str) -> dict:
         pass

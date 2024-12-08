@@ -125,3 +125,19 @@ def change_password() -> Response:
     except:
         return make_response(jsonify({"error": "An error occurred while updating the password"}), 500)
     
+@app.route('/api/login', methods=['PUT'])
+def compare_password() -> Response:
+    app.logger.info('Checking login credentials')
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        if not User.query.filter_by(username=username).first():
+            return make_response(jsonify({'error': 'Invalid username, user does not exist'}), 400) 
+        if (User.check_password(username, password)):
+            return make_response(jsonify({'status': 'success', 'username': username}), 200)
+        else:
+            return make_response(jsonify({'error': 'Incorrect password'}), 400)
+    except:
+        return make_response(jsonify({"error": "An error occurred while checking passwords"}), 500)
+
