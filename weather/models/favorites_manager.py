@@ -126,7 +126,7 @@ class FavoritesManager:
         
         return fav_locations
 
-    def get_favorite_historical(self, location: str, temp: float, wind: float, precipitation: float, humidity: int) -> dict: 
+    def get_favorite_historical(self, location: str) -> dict: 
         """
         Get the historical temperature, wind, precipitation, and humidity for a favorite location, for up to 5 days in the past, not including current.
 
@@ -143,14 +143,30 @@ class FavoritesManager:
         Raises:
             ValueError: if the location has not be saved in favorites.
         """
-        five_days_ago = datetime.now() - timedelta(days=5)
+        historical_data = {}
         if location in self.favorites:
-            weather = {'temp': temp, 'wind': wind, 'precipitation': precipitation, 'humidity': humidity}
-            return weather
+            try:
+                for i in range(1,5):
+                    datex = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+                    query = {"key": api_key, "q": f"{location}", 'dt': datex}
+                    response = requests.get(weather_api + "/history.json", params = query)
+                    if response.get_status != 200:
+                        return {'status': 'failed', 'error': '1006', 'message': 'location not found'}
+                    else:
+                        parsed = response.json()
+                        forecast = parsed['forecast']['forecastday'][0]['day']
+                        historical_data[datex] = {
+                            'temp': forecast['avgtemp_f'],
+                            'wind': forecast['maxwind_mph'],
+                            'precipitation': forecast['totalprecip_in'],
+                            'humidity': forecast['avghumidity']
+                        }
+                return {f'{location}':historical_data}
+            except:
+                return {'status': 'failed', 'error': 400, 'message': 'error occurred when retrieving location'}
         else:
             raise ValueError(f"{location} not found in Favorites.")
     
-# CANT DO THIS WITHOUT PREMIUM API, someone else subscribe?
-    
+
     def get_favorites_forecast_5_days(self, location: str) -> dict:
         pass
