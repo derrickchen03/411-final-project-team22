@@ -94,3 +94,21 @@ logout_user() {
     exit 1
   fi
 }
+
+##############################################
+#
+# Favorites Manager
+#
+##############################################
+
+add_favorite() {
+  echo "Adding a favorite..."
+  curl -s -X POST "$BASE_URL/add-favorite" -H "Content-Type: application/json" \
+    -d '{"location":"Boston"}' | grep -q '"status": "success"'
+  if [ $? -eq 0 ]; then
+    echo "Location added successfully."
+  else
+    echo "Failed to add location."
+    exit 1
+  fi
+}

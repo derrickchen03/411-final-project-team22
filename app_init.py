@@ -1,15 +1,22 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
+from werkzeug.exceptions import BadRequest, Unauthorized
 from sqlalchemy.sql import text
 import sqlite3
+
+from config import ProductionConfig
 from db import db
+from weather.models.account_model import User
+from weather.models.favorites_manager import FavoritesModel
 import requests
 import os
 
 # Load environment variables from .env file
 load_dotenv()
-api_key = os.getenv("API_KEY")
-weather_api = "http://api.weatherapi.com/v1"
+
+# Don't think we need these here
+#api_key = os.getenv("API_KEY")
+#weather_api = "http://api.weatherapi.com/v1"
 
 # Initialize SQLLite SQLAlchemy DB through Flask
 app = Flask(__name__)
@@ -17,10 +24,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URI")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-from weather.models.account_model import User
-from weather.models.favorites_manager import FavoritesManager
 
-favorites_manager = FavoritesManager()
+
+
 
 
 with app.app_context():
@@ -28,6 +34,7 @@ with app.app_context():
         db.create_all()
     except Exception as e:
         print(e)
+favorites_manager = FavoritesModel()
         
 ####################################################
 #
@@ -54,6 +61,7 @@ def healthcheck() -> Response:
     except Exception as e:
         return make_response(jsonify({'status': 'failed'}), 503)
     
+# Don't think we need this either, it's not in the project description
 @app.route('/api/db-check', methods=['GET'])
 def db_check() -> Response:
     """
@@ -81,8 +89,8 @@ if __name__ == '__main__':
 #
 ####################################################
 
-@app.route('/api/add-user', methods=['POST'])
-def add_user() -> Response:
+@app.route('/api/create-user', methods=['POST'])
+def create_user() -> Response:
     app.logger.info('Adding new user')
 
     try:
@@ -124,7 +132,54 @@ def change_password() -> Response:
         return make_response(jsonify({'status': 'success', 'username': username}), 200)
     except:
         return make_response(jsonify({"error": "An error occurred while updating the password"}), 500)
-    
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """
+    Route to log in a user.
+
+    Expected JSON Input:
+        - username (str): The username of the user.
+        - password (str): The user's password.
+
+    Returns:
+        JSON response indicating the success of the login.
+
+    Raises:
+        400 error if input validation fails.
+        401 error if authentication fails (invalid username or password).
+        500 error for any unexpected server-side issues.
+    """
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        app.logger.error("Invalid request payload for login.")
+        raise BadRequest("Invalid request payload. 'username' and 'password' are required.")
+
+    username = data['username']
+    password = data['password']
+
+    try:
+        # Validate user credentials
+        if not User.check_password(username, password):
+            app.logger.warning("Login failed for username: %s", username)
+            raise Unauthorized("Invalid username or password.")
+
+        app.logger.info("User %s logged in successfully.", username)
+        return jsonify({"message": f"User {username} logged in successfully."}), 200
+
+    except Unauthorized as e:
+        return jsonify({"error": str(e)}), 401
+    except Exception as e:
+        app.logger.error("Error during login for username %s: %s", username, str(e))
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
+
+####################################################
+#
+# Favorites Manager
+#
+####################################################
+
 @app.route('/api/add-favorite', methods=['POST'])
 def add_favorite() -> Response:
     """
