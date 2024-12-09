@@ -15,8 +15,8 @@ import os
 load_dotenv()
 
 # Don't think we need these here
-#api_key = os.getenv("API_KEY")
-#weather_api = "http://api.weatherapi.com/v1"
+api_key = os.getenv("API_KEY")
+weather_api = "http://api.weatherapi.com/v1"
 
 # Initialize SQLLite SQLAlchemy DB through Flask
 app = Flask(__name__)
