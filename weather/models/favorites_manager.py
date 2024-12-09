@@ -26,8 +26,8 @@ class FavoritesModel:
     """
 
     def __init__(self):
-      self.favorites: dict[str, dict[str, Any]] = {}  # dictionary of favorite locations
-         """Initializes the FavoritesManager with an empty list of favorites."""
+        """Initializes the FavoritesManager with an empty list of favorites."""
+        self.favorites: dict[str, dict[str, Any]] = {}  # dictionary of favorite locations
 
        
     def get_weather_api(self, location):
@@ -196,7 +196,7 @@ class FavoritesModel:
         """
         historical_data = {}
         if location in self.favorites:
-           try:
+            try:
                 for i in range(1,5):
                     datex = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
                     query = {"key": api_key, "q": f"{location}", 'dt': datex}
@@ -219,7 +219,7 @@ class FavoritesModel:
             raise ValueError(f"{location} not found in Favorites.")
     
 
-    def get_favorites_forecast_5_days(self, location: str) -> dict:
+    def get_favorites_forecast(self, location: str) -> dict:
         """
         Get the 5 day forecast for a favorite location.
 
@@ -227,7 +227,24 @@ class FavoritesModel:
             location (str): the location of the forecast to be retrieved.
 
         Returns:
-            dict: a dictionary of the temperature for each day.
+            dict: a dictionary of the average temperature for each day.
         """
+        if location not in self.favorites:
+            query = {"key": api_key, "q": f"{location}", 'days': 5}
+            response = requests.get(weather_api + "/forecast.json", params = query)
+            
+            if response.get_status != 200:
+                        return {'status': 'failed', 'error': '1006', 'message': 'location not found'}
+            else:
+                
+                parsed = response.json()
+
+                forecast = {}
+                for i in range(5):
+                    avg_temp = parsed['forecast']['forecastday'][i]['day']['avgtemp_f']
+                    forecast[i] = avg_temp
+        else:
+            raise ValueError(f"{location} not found in Favorites.")
         
-        pass
+        return forecast
+        
