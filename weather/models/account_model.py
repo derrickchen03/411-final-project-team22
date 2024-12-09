@@ -18,7 +18,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     salt = db.Column(db.String(32), nullable=False)  # 16-byte salt in hex
-    password = db.Column(db.String(64), nullable=False)  # SHA-256 hash in hex
+    password = db.Column(db.String(64), nullable=False)  # SHA-256 hash in hexI
 
     @classmethod
     def _generate_hashed_password(cls, password: str) -> tuple[str, str]:
