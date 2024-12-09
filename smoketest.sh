@@ -112,3 +112,8 @@ add_favorite() {
     exit 1
   fi
 }
+
+get_favorite_weather() {
+  echo "Getting weather from a favorite location..."
+  curl -s -X GET "$BASE_URL/get-favorite-weather/
+}
