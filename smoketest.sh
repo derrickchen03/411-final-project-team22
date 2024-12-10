@@ -165,7 +165,7 @@ get_favorite_historical() {
 get_favorite_forecast() {
   location=$1
 
-  echo "Getting 5 day forecast for a favorite location: ($location)..."
+  echo "Getting next day forecast for a favorite location: ($location)..."
   response=$(curl -s -X GET "$BASE_URL/get-favorite-forecast/$location")
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Forecast for ($location) retrieved successfully."

@@ -145,10 +145,10 @@ Example Request:
 Example Response:
 ```
 ```
-Route: /get-favorites-forecast/<str:location>
+Route: /get-favorite-forecast/<str:location>
 
 Request Type: GET
-Purpose: Gets the 5 day forecast for a favorite location
+Purpose: Gets the next day forecast for a favorite location
 Request Body:
     location (str): location whose forecast will be retrieved.
 Response Format: JSON

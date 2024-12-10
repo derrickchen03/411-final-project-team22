@@ -316,29 +316,29 @@ def get_favorite_historical(location: str) -> Response:
         return make_response(jsonify({'error': str(e)}), 500)
 
 @app.route('/api/get-favorites-forecast/<str:location>', methods = ['GET'])
-def get_favorites_forecast(location):
+def get_favorite_forecast(location):
     """
-    Route to get the 5 day forecast for a favorite location.
+    Route to get the next day forecast for a favorite location.
 
     Path Paramter:
         location (str): the location whose forecast will be retrieved.
     Returns:
-        JSON response with a dictionary of the average temperature for each day.
+        JSON response with a dictionary of the average temperature for the next day.
 
     Raises:
         400 error if input validation fails.
         500 error if there is an issue retrieving the weather.
     """
     try:
-        app.logger.info(f"Retrieving the 5 day forecast for location: {location}")
+        app.logger.info(f"Retrieving the next day forecast for location: {location}")
 
         if not location:
             return make_response(jsonify({'error': 'Location is required'}), 400)
         
-        weather = favorites_manager.get_favorites_forecast(location)
+        weather = favorites_manager.get_favorite_next_day_forecast(location)
         return make_response(jsonify({'status': 'success', 'forecast': weather}))
     except Exception as e:
-        app.logger.error(f"Error retrieving forecast fore location: {location}")
+        app.logger.error(f"Error retrieving forecast for location: {location}")
         return make_response(jsonify({'error': str(e)}), 500)
 
 @app.route('/api/clear-favorites', methods=['DELETE'])
