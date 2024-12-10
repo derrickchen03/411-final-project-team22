@@ -2,6 +2,7 @@ import pytest
 import requests
 import os
 import json
+from datetime import datetime, timedelta
 
 from weather.models.favorites_manager import FavoritesModel
 
@@ -36,6 +37,39 @@ def sample_favorites():
     sample_favs['New York']['precipitation'] = parsed['current']['precip_in']
     sample_favs['New York']['humidity'] = parsed['current']['humidity']
     return sample_favs
+# Fixture providing historical weather
+@pytest.fixture
+def historical_favorites():
+    historical_favs = {}
+
+    for i in range(1,5):
+        datex = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+        query = {"key": api_key, "q": "Boston", 'dt': datex}
+        response = requests.get(weather_api + "/history.json", params = query) 
+
+        parsed = response.json()
+        forecast = parsed['forecast']['forecastday'][0]['day']
+        historical_favs[datex] = {
+            'temp': forecast['avgtemp_f'],
+            'wind': forecast['maxwind_mph'],
+            'precipitation': forecast['totalprecip_in'],
+            'humidity': forecast['avghumidity']
+        }
+    return {"Boston":historical_favs}
+
+# Fixture providing next day forecast
+@pytest.fixture
+def next_day_forecast():
+    query = {"key": api_key, "q": "Boston", 'days': 2}
+    response = requests.get(weather_api + "/forecast.json", params = query)
+
+    parsed = response.json()
+    next_day_forecast = parsed['forecast']['forecastday'][1]
+    date = next_day_forecast['date']
+    maxtemp = next_day_forecast['day']['maxtemp_f']
+    mintemp = next_day_forecast['day']['mintemp_f']
+
+    return {"date": date, "max_temp": maxtemp, "min_temp": mintemp}
 
 def test_add_favorite(favorites_model):
     """testing adding a location to the favorites dictionary."""
@@ -83,7 +117,7 @@ def test_clear_favorites_empty(favorites_model):
     # Assert that the favorites dictionary is still empty
     assert len(favorites_model.favorites) == 0, "Favorites dictionary should remain empty if it was already empty."
 
-def test_get_favorite_weather(favorites_model):
+def test_get_favorite_weather(favorites_model, sample_favorites):
     """Test that get_favorite_weather retrieves the weather."""
     favorites_model.favorites.extend(sample_favorites)
 
@@ -113,3 +147,36 @@ def test_get_all_favorites_current_weather_empty(favorites_model):
     with pytest.raises(ValueError, match="No locations saved in favorites."):
         favorites_model.get_all_favorites_current_weather()
 
+def test_get_all_favorites(favorites_model, sample_favorites):
+    """Test successfully retrieving all locations from favorites."""
+    favorites_model.favorites.extend(sample_favorites)
+
+    all_locations = favorites_model.get_all_favorites()
+    assert len(all_locations) == 2
+    assert all_locations[0] == "Boston"
+    assert all_locations[1] == "New York"
+
+def test_get_all_favorites_empty(favorites_model):
+    """Test error is raised when favorites is empty."""
+    favorites_model.clear_favorites()
+
+    with pytest.raises(ValueError, match="Favorites dictionary is empty."):
+        favorites_model.get_all_favorites()
+
+def test_get_favorite_historical(favorites_model, historical_favorites):
+    """Test that get_favorite_historical gets the historical weather for the location."""
+    # Call the function and verify the result
+    historical = favorites_model.get_favorite_historical('Boston')
+    assert historical == historical_favorites, "Expected get_favorites_historical to return the correct weather dictionary."
+
+def test_get_favorite_historical_bad_location(favorites_model):
+    """Test error is rased when the location is not in favorites."""
+
+    with pytest.raises(ValueError, match="Denver not found in Favorites."):
+        favorites_model.get_favorite_historical("Denver")
+
+def test_get_favorite_next_day_forecast(favorites_model, favorite_forecast):
+    """Test that get_favorite_next_day_forecast gets the weather for the following day."""
+    # Call the function and verify the result
+    forecast = favorites_model.get_favorite_next_day_forecast("Boston")
+    assert forecast == favorite_forecast
