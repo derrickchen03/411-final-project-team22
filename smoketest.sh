@@ -114,6 +114,87 @@ add_favorite() {
 }
 
 get_favorite_weather() {
-  echo "Getting weather from a favorite location..."
-  curl -s -X GET "$BASE_URL/get-favorite-weather/
+  location=$1
+
+  echo "Getting weather from a favorite location: ($location)..."
+  response=$(curl -s -X GET "$BASE_URL/get-favorite-weather/$location")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Weather for ($location) retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Weather JSON (Favorite Location $location):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get weather for favorite location ($location)."
+    exit 1
+  fi
+}
+
+get_all_favorites_current_weather() {
+  echo "Getting all favorite locations..."
+  response=$(curl -s -X GET "$BASE_URL/get-all-favorites-current-weather")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "All favorites with their weather retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Favorites weather JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get all favorites weather."
+    exit 1
+  fi
+}
+
+get_favorite_historical() {
+  location=$1
+
+  echo "Getting historical weather from a favorite location: ($location)..."
+  response=$(curl -s -X GET "$BASE_URL/get-favorite-historical-weather/$location")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Historical weather for ($location) retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Historical Weather JSON (Favorite Location $location):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get historical weather for favorite location ($location)."
+    exit 1
+  fi
+}
+
+get_favorite_forecast() {
+  location=$1
+
+  echo "Getting 5 day forecast for a favorite location: ($location)..."
+  response=$(curl -s -X GET "$BASE_URL/get-favorite-forecast/$location")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Forecast for ($location) retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Forecast JSON (Favorite Location $location):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get forecast for favorite location ($location)."
+    exit 1
+  fi
+}
+
+clear_favorites() {
+  echo "Clearing favorites..."
+  curl -s -X DELETE "$BASE_URL/clear-favorites" | grep -q '"status": "success"'
+}
+
+get_all_favorites() {
+  echo "Getting all favorite locations..."
+  response=$(curl -s -X GET "$BASE_URL/get-all-favorites")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "All favorite locations retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Favorites JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get all favorites."
+    exit 1
+  fi
 }
