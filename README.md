@@ -16,7 +16,7 @@ Request Body:
 Response Format: JSON
     Success Response:
         Code: 200
-        Content: 
+        Content: {'status': 'success', 'username': username}
 Example Request:
 Example Response:
 ```
@@ -30,7 +30,7 @@ Request Body:
 Response Format: JSON
     Success Response:
         Code: 200
-        Content: 
+        Content: {'status': 'success', 'username': username}
 Example Request:
 Example Response:
 ```
@@ -45,7 +45,7 @@ Request Body:
 Response Format: JSON
     Success Response:
         Code: 200
-        Content: 
+        Content: {'status': 'success', 'username': username}
 Example Request:
 Example Response:
 ```
@@ -60,7 +60,7 @@ Request Body:
 Response Format: JSON
     Success Response:
         Code: 200
-        Content: 
+        Content: {'status': 'success', 'username': username}
 Example Request:
 Example Response:
 ```
@@ -97,20 +97,91 @@ Request Body:
     location (str): The location to be added to the favorites.
 Response Format: JSON
     Success Response:
+        Code: 200
+        Content: {'status': 'success', 'location': location}
 Example Request:
 Example Response:
 ```
-
 ```
-Route: /clear-favorites/<int:user_id>
+Route: /get-favorite-weather/<str:location>
+
+Request Type: GET
+Purpose: Gets the weather for a favorite location.
+Request Body:
+    location (str): location whose weather will be retrieved.
+Response Format: JSON
+    Success Response:
+        Code: 200
+        Content: {'status': 'success', 'weather': weather}
+Example Request:
+Example Response:
+```
+```
+Route: /get-all-favorites-current-weather
+
+Request Type: GET
+Purpose: Gets the current weather for all locations in favorites.
+Request Body:
+    N/A
+Response Format: JSON
+    Success Response:
+        Code: 200
+        Content: {'status': 'success', 'favorite weather': weather}
+Example Request:
+Example Response:
+```
+```
+Route: /get-favorite-historical/<str:location>
+
+Request Type: GET
+Purpose: Gets the historical weather for a favorite location
+Request Body:
+    location (str): location whose historical weather will be retrieved.
+Response Format: JSON
+    Success Response:
+        Code: 200
+        Content: {'status': 'success', 'historical weather': weather}
+Example Request:
+Example Response:
+```
+```
+Route: /get-favorites-forecast/<str:location>
+
+Request Type: GET
+Purpose: Gets the 5 day forecast for a favorite location
+Request Body:
+    location (str): location whose forecast will be retrieved.
+Response Format: JSON
+    Success Response:
+        Code: 200
+        Content: {'status': 'success', 'forecast': weather}
+Example Request:
+Example Response:
+```
+```
+Route: /clear-favorites
 Request Type: DELETE
 Purpose: Clear the dictionary of the user's favorite weather locations.
 Request Body:
-    user_id (Integer): The ID for the user currently logged in.
+    N/A
 Response Format: JSON
     Success Response Example:
         Code: 200
         Content: {"status": "success"}
+Example Request:
+Example Response:
+```
+```
+Route: /get-all-favorites
+
+Request Type: GET
+Purpose: Gets all locations in favorites.
+Request Body:
+    N/A
+Response Format: JSON
+    Success Response:
+        Code: 200
+        Content: {'status': 'success', 'favorite list': fav_list}
 Example Request:
 Example Response:
 ```
