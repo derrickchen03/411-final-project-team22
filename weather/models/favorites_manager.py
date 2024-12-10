@@ -221,10 +221,11 @@ class FavoritesModel:
             raise ValueError(f"{location} not found in Favorites.")
     
     def get_all_favorite_historical(self) -> dict:
-        """_summary_
+        """
+        Get all historical weather for all favorite locations.
 
         Returns:
-            dict: _description_
+            dict: a dictionary containing all historical weather for all locations
         """
         logger.info("Fetching the historical data for the list of favorite locations")
         historical_data_all = {}
@@ -269,10 +270,11 @@ class FavoritesModel:
 
         
     def get_all_favorites_next_day_forecast(self) -> dict:
-        """_summary_
+        """
+        Get all next day forecasts for all favorite locations.
 
         Returns:
-            dict: _description_
+            dict: a dictionary with all next day forecasts for all locations.
         """
         
         logger.info("Retrieving next day forecast for all favorites")
@@ -292,13 +294,14 @@ class FavoritesModel:
         return forecast_data_all
     
     def get_favorite_alerts(self, location: str) -> dict:
-        """_summary_
+        """
+        Gets alert data for a favorite location.
 
         Args:
-            location (str): _description_
+            location (str): the location of alert data to be retrieved.
 
         Returns:
-            dict: _description_
+            dict: a dictionary with alert data for the weather location
         """
         logger.info(f"Fetching the alert data for a favorite location, {location}")
         if location in self.favorites:
@@ -318,10 +321,11 @@ class FavoritesModel:
             raise ValueError(f"{location} not found in Favorites.")
     
     def get_all_favorite_alerts(self) -> dict:
-        """_summary_
+        """
+        Gets alert data for all favorite locations.
 
         Returns:
-            dict: _description_
+            dict: dictionary containing all alerts for favorite locations.
         """
         logger.info("Fetching the alert data for all favorites")
         alert_data_all = {}
@@ -338,13 +342,14 @@ class FavoritesModel:
         return alert_data_all
     
     def get_favorite_coordinates(self, location: str) -> dict:
-        """_summary_
+        """
+        Gets coordinates for a favorite location.
 
         Args:
-            location (str): _description_
+            location (str): the location of whose coordinates will be retrived. 
 
         Returns:
-            dict: _description_
+            dict: a dictionary with coordinates of the favorite location
         """
         
         logger.info(f"Retrieving coordinate data for {location} in favorites")
@@ -368,10 +373,11 @@ class FavoritesModel:
         return {"lattitude": lat, "longitude": lon}
     
     def get_all_favorite_coordinates(self) -> dict:
-        """_summary_
+        """
+        Gets coordinates for all favorite locations.
 
         Returns:
-            dict: _description_
+            dict: a dictionary with all coordinates of favorite locations.
         """
         logger.info("Fetching the alert data for all favorites")
         coordinate_data_all = {}
