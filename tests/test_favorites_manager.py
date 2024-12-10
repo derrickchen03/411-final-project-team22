@@ -71,6 +71,31 @@ def next_day_forecast():
 
     return {"date": date, "max_temp": maxtemp, "min_temp": mintemp}
 
+#Fixture providing alerts
+@pytest.fixture
+def favorite_alerts():
+    query = {"key": api_key, "q": f"Boston"}
+    response = requests.get(weather_api + "/alerts.json", params = query)
+
+    parsed = response.json()
+    alerts = parsed['alerts']['alert']
+    return {'alert': alerts}
+
+#Fixture providing coordinates
+@pytest.fixture
+def favorite_coordinates():
+    query = {"key": api_key, "q": f"Boston"}
+    response = requests.get(weather_api + "/timezone.json", params = query)
+    
+    parsed = response.json()
+    lat = parsed['location']['lat']
+    lon = parsed['location']['lon']
+    return {"lattitude": lat, "longitude": lon}
+
+####################################################################
+#############        UNIT TESTS       ##############################
+####################################################################
+
 def test_add_favorite(favorites_model):
     """testing adding a location to the favorites dictionary."""
     favorites_model.add_favorite("Boston", 32.0, 12.0, 3.5, 20)
@@ -180,3 +205,24 @@ def test_get_favorite_next_day_forecast(favorites_model, favorite_forecast):
     # Call the function and verify the result
     forecast = favorites_model.get_favorite_next_day_forecast("Boston")
     assert forecast == favorite_forecast
+
+def test_get_all_favorites_next_day_forecast(favorites_model):
+    pass
+
+def test_get_favorite_alerts(favorites_model, favorite_alerts):
+    """Test that get_favorite_alerts gets the alerts for the location."""
+    # Call the function and verify the result
+    alerts = favorites_model.get_favorite_alerts("Boston")
+    assert alerts == favorite_alerts
+
+def test_get_all_favorite_alerts(favorites_model):
+    pass
+
+def test_get_favorite_coordinates(favorites_model, favorite_coordinates):
+    """Test that get_favorite_coordinates gets the correct coordinates for a location."""
+    #Call the function and verify result
+    coordinates = favorites_model.get_favorite_coordinates("Boston")
+    assert coordinates == favorite_coordinates
+
+def test_get_all_favorite_coordinates(favorites_model):
+    pass
