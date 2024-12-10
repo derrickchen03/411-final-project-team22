@@ -37,24 +37,32 @@ def sample_favorites():
     sample_favs['New York']['humidity'] = parsed['current']['humidity']
     return sample_favs
 
-def test_add_favorite():
+def test_add_favorite(favorites_model):
     """testing adding a location to the favorites dictionary."""
     favorites_model.add_favorite("Boston", 32.0, 12.0, 3.5, 20)
     assert len(favorites_model.favorites) == 1
     assert favorites_model.favorites[0] == 'Boston'
     
 
-def test_add_favorite_invalid_temp():
+def test_add_favorite_invalid_temp(favorites_model):
     """Test error when adding a location with an invalid temperature """
-    pass
+    with pytest.raises(ValueError, match="Invalid temperature: 32, should be a float."):
+        favorites_model.add_favorite("Boston", 32, 12.0, 3.5, 20)
 
-def test_add_favorite_invalid_wind():
+def test_add_favorite_invalid_wind(favorites_model):
     """Test error when adding a location with an invalid wind value."""
-    pass
+    with pytest.raises(ValueError, match="Invalid wind: 12, should be a float."):
+        favorites_model.add_favorite("Boston", 32.0, 12, 3.5, 20)
 
-def test_add_favorite_invalid_precipitation():
+def test_add_favorite_invalid_precipitation(favorites_model):
     """Test error when adding a location with an invalid precipitation value."""
-    pass
+    with pytest.raises(ValueError, match="Invalid precipitation: 3, should be a float."):
+        favorites_model.add_favorite("Boston", 32.0, 12.0, 3, 20)
+
+def test_add_favorite_invalid_humidity(favorites_model):
+    """Test error when adding a location with an invalid humidity value."""
+    with pytest.raises(ValueError, match="Invalid humidity: 20.4, should be an integer."):
+        favorites_model.add_favorite("Boston", 32, 12.0, 3.5, 20.4)
 
 def test_clear_favorites(favorites_model, sample_favorites):
     """Test that clear_favorites empties the dictionary."""
@@ -82,3 +90,26 @@ def test_get_favorite_weather(favorites_model):
     # Call the function and verify the result
     favorites = favorites_model.get_favorite_weather('Boston')
     assert favorites == favorites_model.favorites['Boston'], "Expected get_favorites_weather to return the correct weather dictionary."
+
+def test_get_favorite_weather_bad_location(favorites_model, sample_favorites):
+    """Test retrieving the weather for a location that doesn't exist in the favorites dictionary"""
+    favorites_model.favorites.extend(sample_favorites)
+    with pytest.raises(ValueError, match="Denver not found in Favorites."):
+        favorites_model.get_favorite_weather("Denver")
+
+def test_get_all_favorites_current_weather(favorites_model, sample_favorites):
+    """Test successfullly retrieving the temperature data for each location in favorites."""
+    favorites_model.favorites.extend(sample_favorites)
+
+    all_favorites = favorites_model.get_all_favorites_current_weather()
+    assert len(all_favorites) == 2
+    assert all_favorites[0] == "Boston"
+    assert all_favorites[1] == "New York"
+
+def test_get_all_favorites_current_weather_empty(favorites_model):
+    """Test error is raised when favorites is empty."""
+    favorites_model.clear_favorites()
+
+    with pytest.raises(ValueError, match="No locations saved in favorites."):
+        favorites_model.get_all_favorites_current_weather()
+

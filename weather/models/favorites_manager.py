@@ -82,8 +82,8 @@ class FavoritesModel:
             raise ValueError(f"Invalid wind: {wind}, should be a float.")
         if not isinstance(precipitation, float) or precipitation != None:
             raise ValueError(f"Invalid precipitation: {precipitation}, should be a float.")
-        if not isinstance(humidity, float) or humidity != None:
-            raise ValueError(f"Invalid humidity: {humidity}, should be a float.")
+        if not isinstance(humidity, int) or humidity != None:
+            raise ValueError(f"Invalid humidity: {humidity}, should be an int.")
         
 
         logger.info("Adding weather for %s to favorites.", location)
