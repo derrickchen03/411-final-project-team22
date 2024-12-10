@@ -12,10 +12,10 @@ Request Type: POST
 Purpose: Adds a favorite to the user's list of favorites
 
 Request Body:
-'''
+```
     user_id (Integer): The ID for the user currently logged in.
     location (String): The location to be added to the favorites.
-'''
+```
 Response Format: JSON
     Success Response:
 Example Request:
