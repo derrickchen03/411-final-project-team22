@@ -29,7 +29,19 @@ check_health() {
   if [ $? -eq 0 ]; then
     echo "Service is healthy."
   else
-    echo "Health check failed."
+    echo "Health check failed h."
+    exit 1
+  fi
+}
+
+# Function to check the health of the service
+check_db() {
+  echo "Checking database status..."
+  curl -s -X GET "$BASE_URL/db-check" | grep -q '"status": "healthy"'
+  if [ $? -eq 0 ]; then
+    echo "Service is healthy."
+  else
+    echo "Health check failed db."
     exit 1
   fi
 }
@@ -232,3 +244,6 @@ get_favorite_coordinates() {
     exit 1
   fi
 }
+
+check_health
+check_db
