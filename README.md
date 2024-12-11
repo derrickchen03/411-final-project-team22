@@ -1,7 +1,7 @@
 # 411-final-project-team22
 
 ## Project Description
-DESCRIPTION
+This application allows users to store favorite weather locations in a dictionary and then request information regarding that location including the current weather (ie temperature, wind speed, precipitation), or the next day forecast or the historical weather of that location. The application also returns the attributes of all favorites saved if desired.
 
 ### Route Documentation
 #### User Management 
@@ -18,12 +18,20 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'username': username}
 Example Request:
+    {
+        "username": "newuser",
+        "password": "password"
+    }
 Example Response:
+    {
+        "'status': 'success', 'username': newuser",
+        "status": "200"
+    }
 ```
 ```
 Route: /remove-user
 
-Request Type: DELETES
+Request Type: DELETE
 Purpose: Deletes an existing user.
 Request Body:
     username (str): user username which already exists
@@ -32,7 +40,14 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'username': username}
 Example Request:
+    {
+        "username": "newuser"
+    }
 Example Response:
+    {
+        "'status': 'success', 'username': newuser",
+        "status": "200"
+    }
 ```
 ```
 Route: /change-password
@@ -47,7 +62,15 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'username': username}
 Example Request:
+    {
+        "username": "newuser",
+        "password": "newpass"
+    }
 Example Response:
+    {
+        "'status': 'success', 'username': newuser",
+        "status": "200"
+    }
 ```
 ```
 Route: /compare-password
@@ -62,7 +85,15 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'username': username}
 Example Request:
+    {
+        "username": "newuser",
+        "password": "newpass"
+    }
 Example Response:
+    {
+        "'status': 'success', 'username': newuser",
+        "status": "200"
+    }
 ```
 ```
 Route: /login
@@ -100,7 +131,14 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'location': location}
 Example Request:
+    {
+        "location": "Boston"
+    }
 Example Response:
+    {
+        "'status': 'success', 'location': Boston",
+        "status": "200"
+    }
 ```
 ```
 Route: /get-favorite-weather/<str:location>
@@ -114,7 +152,14 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'weather': weather}
 Example Request:
+    {    
+        "location": "Boston"
+    }
 Example Response:
+    {
+        "'status': 'success', 'weather': DICT",
+        "status": "200"
+    }
 ```
 ```
 Route: /get-all-favorites-current-weather
@@ -129,6 +174,10 @@ Response Format: JSON
         Content: {'status': 'success', 'favorite weather': weather}
 Example Request:
 Example Response:
+    {
+        "'status': 'success', 'favorite weather': DICT",
+        "status": "200"
+    }
 ```
 ```
 Route: /get-favorite-historical/<str:location>
@@ -142,7 +191,14 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'historical weather': weather}
 Example Request:
+    {    
+        "location": "Boston"
+    }
 Example Response:
+    {
+        "'status': 'success', 'historical weather': DICT",
+        "status": "200"
+    }
 ```
 ```
 Route: /get-favorite-forecast/<str:location>
@@ -156,7 +212,14 @@ Response Format: JSON
         Code: 200
         Content: {'status': 'success', 'forecast': weather}
 Example Request:
+    {    
+        "location": "Boston"
+    }
 Example Response:
+    {
+        "'status': 'success', 'forecast': DICT",
+        "status": "200"
+    }
 ```
 ```
 Route: /clear-favorites
@@ -170,6 +233,10 @@ Response Format: JSON
         Content: {"status": "success"}
 Example Request:
 Example Response:
+    {
+        "'status': 'success'",
+        "status": "200"
+    }
 ```
 ```
 Route: /get-all-favorites
@@ -184,4 +251,8 @@ Response Format: JSON
         Content: {'status': 'success', 'favorite list': fav_list}
 Example Request:
 Example Response:
+    {
+        "'status': 'success', 'favorite list': ["Boston", "New York", "Springfield"] ",
+        "status": "200"
+    }
 ```
