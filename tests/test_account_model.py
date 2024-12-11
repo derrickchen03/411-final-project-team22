@@ -48,6 +48,7 @@ def client(app):
 def session(app):
     with app.app_context():
         yield db.session
+
 ##########################################################
 # User Creation
 ##########################################################
