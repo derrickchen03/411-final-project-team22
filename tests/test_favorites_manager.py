@@ -204,7 +204,7 @@ def test_get_favorite_next_day_forecast(favorites_model, favorite_forecast):
     """Test that get_favorite_next_day_forecast gets the weather for the following day."""
     # Call the function and verify the result
     forecast = favorites_model.get_favorite_next_day_forecast("Boston")
-    assert forecast == favorite_forecast
+    assert forecast == favorite_forecast, "Expected get_favorite_next_day_forecast to return the correct weather dictionary."
 
 def test_get_all_favorites_next_day_forecast(favorites_model):
     pass
@@ -213,16 +213,11 @@ def test_get_favorite_alerts(favorites_model, favorite_alerts):
     """Test that get_favorite_alerts gets the alerts for the location."""
     # Call the function and verify the result
     alerts = favorites_model.get_favorite_alerts("Boston")
-    assert alerts == favorite_alerts
-
-def test_get_all_favorite_alerts(favorites_model):
-    pass
+    assert alerts == favorite_alerts, "Expected get_favorites_alerts to return the correct alert dictionary."
 
 def test_get_favorite_coordinates(favorites_model, favorite_coordinates):
     """Test that get_favorite_coordinates gets the correct coordinates for a location."""
     #Call the function and verify result
     coordinates = favorites_model.get_favorite_coordinates("Boston")
-    assert coordinates == favorite_coordinates
+    assert coordinates == favorite_coordinates, "Expected get_favorites_coordinates to return the correct coordinates dictionary."
 
-def test_get_all_favorite_coordinates(favorites_model):
-    pass
