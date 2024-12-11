@@ -19,12 +19,12 @@ def favorites_model():
 # Fixture providing a sample favorites dictionary
 @pytest.fixture
 def sample_favorites():
-    sample_favs = {}
+    sample_favs = {'Boston': {}, 'New York': {}}
 
     query = {"key": api_key, "q": "Boston"}
     response = requests.get(weather_api + "/current.json", params = query)
     
-    parsed = json.loads(response)
+    parsed = response.json()
     sample_favs['Boston']['temp'] = parsed['current']['temp_f']
     sample_favs['Boston']['wind'] = parsed['current']['wind_mph']
     sample_favs['Boston']['precipitation'] = parsed['current']['precip_in']
@@ -101,7 +101,7 @@ def test_add_favorite(favorites_model):
     """testing adding a location to the favorites dictionary."""
     favorites_model.add_favorite("Boston", 32.4, 12.3, 3.5, 20)
     assert len(favorites_model.favorites) == 1
-    assert favorites_model.favorites[0] == 'Boston'
+    assert favorites_model.favorites['Boston'] == {'temp': 32.4, 'wind': 12.3, 'precipitation': 3.5, 'humidity': 20}
     
 
 def test_add_favorite_invalid_temp(favorites_model):
@@ -121,12 +121,12 @@ def test_add_favorite_invalid_precipitation(favorites_model):
 
 def test_add_favorite_invalid_humidity(favorites_model):
     """Test error when adding a location with an invalid humidity value."""
-    with pytest.raises(ValueError, match="Invalid humidity: 20.4, should be an integer."):
-        favorites_model.add_favorite("Boston", 32, 12.0, 3.5, 20.4)
+    with pytest.raises(ValueError, match="Invalid humidity: 20.4, should be an int."):
+        favorites_model.add_favorite("Boston", 32.0, 12.0, 3.5, 20.4)
 
 def test_clear_favorites(favorites_model, sample_favorites):
     """Test that clear_favorites empties the dictionary."""
-    favorites_model.favorites.extend(sample_favorites)
+    favorites_model.favorites.update(sample_favorites)
 
     # Call the clear_favorites method
     favorites_model.clear_favorites()
@@ -145,7 +145,7 @@ def test_clear_favorites_empty(favorites_model):
 
 def test_get_favorite_weather(favorites_model, sample_favorites):
     """Test that get_favorite_weather retrieves the weather."""
-    favorites_model.favorites.extend(sample_favorites)
+    favorites_model.favorites.update(sample_favorites)
 
     # Call the function and verify the result
     favorites = favorites_model.get_favorite_weather('Boston')
@@ -153,18 +153,18 @@ def test_get_favorite_weather(favorites_model, sample_favorites):
 
 def test_get_favorite_weather_bad_location(favorites_model, sample_favorites):
     """Test retrieving the weather for a location that doesn't exist in the favorites dictionary"""
-    favorites_model.favorites.extend(sample_favorites)
+    favorites_model.favorites.update(sample_favorites)
     with pytest.raises(ValueError, match="Denver not found in Favorites."):
         favorites_model.get_favorite_weather("Denver")
 
 def test_get_all_favorites_current_weather(favorites_model, sample_favorites):
     """Test successfullly retrieving the temperature data for each location in favorites."""
-    favorites_model.favorites.extend(sample_favorites)
+    favorites_model.favorites.update(sample_favorites)
 
     all_favorites = favorites_model.get_all_favorites_current_weather()
     assert len(all_favorites) == 2
-    assert all_favorites[0] == "Boston"
-    assert all_favorites[1] == "New York"
+    assert "Boston" in all_favorites.keys()
+    assert "New York" in all_favorites.keys()
 
 def test_get_all_favorites_current_weather_empty(favorites_model):
     """Test error is raised when favorites is empty."""
@@ -175,12 +175,12 @@ def test_get_all_favorites_current_weather_empty(favorites_model):
 
 def test_get_all_favorites(favorites_model, sample_favorites):
     """Test successfully retrieving all locations from favorites."""
-    favorites_model.favorites.extend(sample_favorites)
+    favorites_model.favorites.update(sample_favorites)
 
     all_locations = favorites_model.get_all_favorites()
     assert len(all_locations) == 2
-    assert all_locations[0] == "Boston"
-    assert all_locations[1] == "New York"
+    assert "Boston" in all_locations
+    assert "New York" in all_locations
 
 def test_get_all_favorites_empty(favorites_model):
     """Test error is raised when favorites is empty."""
@@ -189,8 +189,9 @@ def test_get_all_favorites_empty(favorites_model):
     with pytest.raises(ValueError, match="Favorites dictionary is empty."):
         favorites_model.get_all_favorites()
 
-def test_get_favorite_historical(favorites_model, historical_favorites):
+def test_get_favorite_historical(favorites_model, historical_favorites, sample_favorites):
     """Test that get_favorite_historical gets the historical weather for the location."""
+    favorites_model.favorites.update(sample_favorites)
     # Call the function and verify the result
     historical = favorites_model.get_favorite_historical('Boston')
     assert historical == historical_favorites, "Expected get_favorites_historical to return the correct weather dictionary."
@@ -201,20 +202,23 @@ def test_get_favorite_historical_bad_location(favorites_model):
     with pytest.raises(ValueError, match="Denver not found in Favorites."):
         favorites_model.get_favorite_historical("Denver")
 
-def test_get_favorite_next_day_forecast(favorites_model, favorite_forecast):
+def test_get_favorite_next_day_forecast(favorites_model, next_day_forecast, sample_favorites):
     """Test that get_favorite_next_day_forecast gets the weather for the following day."""
+    favorites_model.favorites.update(sample_favorites)
     # Call the function and verify the result
     forecast = favorites_model.get_favorite_next_day_forecast("Boston")
-    assert forecast == favorite_forecast, "Expected get_favorite_next_day_forecast to return the correct weather dictionary."
+    assert forecast == next_day_forecast, "Expected get_favorite_next_day_forecast to return the correct weather dictionary."
 
-def test_get_favorite_alerts(favorites_model, favorite_alerts):
+def test_get_favorite_alerts(favorites_model, favorite_alerts, sample_favorites):
     """Test that get_favorite_alerts gets the alerts for the location."""
+    favorites_model.favorites.update(sample_favorites)
     # Call the function and verify the result
     alerts = favorites_model.get_favorite_alerts("Boston")
     assert alerts == favorite_alerts, "Expected get_favorites_alerts to return the correct alert dictionary."
 
-def test_get_favorite_coordinates(favorites_model, favorite_coordinates):
+def test_get_favorite_coordinates(favorites_model, favorite_coordinates, sample_favorites):
     """Test that get_favorite_coordinates gets the correct coordinates for a location."""
+    favorites_model.favorites.update(sample_favorites)
     #Call the function and verify result
     coordinates = favorites_model.get_favorite_coordinates("Boston")
     assert coordinates == favorite_coordinates, "Expected get_favorites_coordinates to return the correct coordinates dictionary."
