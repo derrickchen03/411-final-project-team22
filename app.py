@@ -20,7 +20,7 @@ weather_api = "http://api.weatherapi.com/v1"
 
 # Initialize SQLLite SQLAlchemy DB through Flask
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URI")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URI", 'sqlite:///instance/users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -76,12 +76,10 @@ def db_check() -> Response:
     try:
         db.session.execute(text("SELECT 1"))
         app.logger.info("Database connection is OK.")
-        return make_response(jsonify({'database_status': 'healthy'}), 200)
+        return make_response(jsonify({'status': 'healthy'}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 404)
     
-if __name__ == '__main__':
-    app.run(debug=True)
     
 ####################################################
 #
@@ -95,12 +93,14 @@ def create_user() -> Response:
 
     try:
         data = request.get_json()
+        if not data:
+            return make_response(jsonify({"error": "Request must be in JSON format"}), 400)
         username = data.get('username')
         password = data.get('password')
         if User.query.filter_by(username=username).first():
             return make_response(jsonify({'error': 'Invalid username, username already taken'}), 400)
         User.create_user(username, password)
-        return make_response(jsonify({'status': 'success', 'username': username}), 200)
+        return make_response(jsonify({'status': 'user added', 'username': username}), 200)
     except:
         return make_response(jsonify({"error": "An error occurred while creating the user"}), 500)
 
@@ -242,7 +242,7 @@ def add_favorite() -> Response:
         app.logger.error("Failed to add favorite: %s", str(e))
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-favorite-weather/<str:location>', methods = ['GET'])
+@app.route('/api/get-favorite-weather/<string:location>', methods = ['GET'])
 def get_favorite_weather(location: str) -> Response:
     """
     Route to get the weather for a favorite location.
@@ -289,7 +289,7 @@ def get_all_favorites_current_weather() -> Response:
         app.logger.error("Error retrieving temperatures for all locations in favorites")
         return make_response(jsonify({'error': str(e)}), 500)
     
-@app.route('/api/get-favorites-historical/<str:location>', methods = ['GET'])
+@app.route('/api/get-favorites-historical/<string:location>', methods = ['GET'])
 def get_favorite_historical(location: str) -> Response:
     """
     Route to get the historical weather for a favorite location.
@@ -315,7 +315,7 @@ def get_favorite_historical(location: str) -> Response:
         app.logger.error("Error retrieving temperatures for all locations in favorites")
         return make_response(jsonify({'error': str(e)}), 500)
 
-@app.route('/api/get-favorites-forecast/<str:location>', methods = ['GET'])
+@app.route('/api/get-favorites-forecast/<string:location>', methods = ['GET'])
 def get_favorite_forecast(location):
     """
     Route to get the next day forecast for a favorite location.
@@ -380,7 +380,7 @@ def get_all_favorites() -> Response:
         app.logger.error("Error retrieving list of locations in favorites.")
         return make_response(jsonify({'error': str(e)}), 500)
     
-@app.route('api/get-favorite-alerts/<str:location>', methods = ['GET'])
+@app.route('/api/get-favorite-alerts/<string:location>', methods = ['GET'])
 def get_alerts_favorite(location) -> Response:
     """
     Route to get the alerts for a favorite location.
@@ -406,7 +406,7 @@ def get_alerts_favorite(location) -> Response:
         app.logger.error(f"Error retrieving alerts for location: {location}")
         return make_response(jsonify({'error': str(e)}), 500)
     
-@app.route('api/get-favorite-coordinates/<str:location>', methods=['GET'])
+@app.route('/api/get-favorite-coordinates/<string:location>', methods=['GET'])
 def get_coordinates_favorite(location) -> Response:
     """
     Route to get the coordinates for a favorite location.
@@ -432,4 +432,5 @@ def get_coordinates_favorite(location) -> Response:
         app.logger.error(f"Error retrieving coordinates for location: {location}")
         return make_response(jsonify({'error': str(e)}), 500)
 
-        
+if __name__ == '__main__':
+    app.run(debug=True, host = '0.0.0.0', port = 5000)

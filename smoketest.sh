@@ -54,9 +54,12 @@ check_db() {
 
 # Function to create a user
 create_user() {
-  echo "Creating a new user..."
+  username=$1
+  password=$2
+
+  echo "Creating a new user with username $username"
   curl -s -X POST "$BASE_URL/create-user" -H "Content-Type: application/json" \
-    -d '{"username":"testuser", "password":"password123"}' | grep -q '"status": "user added"'
+    -d "{\"username\":\"$username\", \"password\":\"$password\"}" | grep -q "status": "user added"
   if [ $? -eq 0 ]; then
     echo "User created successfully."
   else
@@ -67,9 +70,11 @@ create_user() {
 
 # Function to log in a user
 login_user() {
+  username=$1
+  password=$2
   echo "Logging in user..."
   response=$(curl -s -X POST "$BASE_URL/login" -H "Content-Type: application/json" \
-    -d '{"username":"testuser", "password":"password123"}')
+    -d "{"username":\"$username\", "password":\"$password\"}")
   if echo "$response" | grep -q '"message": "User testuser logged in successfully."'; then
     echo "User logged in successfully."
     if [ "$ECHO_JSON" = true ]; then
@@ -88,10 +93,12 @@ login_user() {
 
 # Function to log out a user
 logout_user() {
+  username=$1
+
   echo "Logging out user..."
   response=$(curl -s -X POST "$BASE_URL/logout" -H "Content-Type: application/json" \
     -d '{"username":"testuser"}')
-  if echo "$response" | grep -q '"message": "User testuser logged out successfully."'; then
+  if echo "$response" | grep -q ""message": "User \"$username\" logged out successfully.""; then
     echo "User logged out successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Logout Response JSON:"
@@ -114,9 +121,11 @@ logout_user() {
 ##############################################
 
 add_favorite() {
+  location=$1
+
   echo "Adding a favorite..."
   curl -s -X POST "$BASE_URL/add-favorite" -H "Content-Type: application/json" \
-    -d '{"location":"Boston"}' | grep -q '"status": "success"'
+    -d "{"location":\"$Location\"}" | grep -q '"status": "success"'
   if [ $? -eq 0 ]; then
     echo "Location added successfully."
   else
@@ -247,3 +256,17 @@ get_favorite_coordinates() {
 
 check_health
 check_db
+create_user abc 123
+login_user abc 123
+logout_user abc
+add_favorite boston
+get_favorite_weather boston
+get_all_favorites_current_weather
+get_favorite_historical boston
+get_favorite_forecast boston
+get_all_favorites
+clear_favorites
+add_favorite london
+get_all_favorites
+get_favorite_alerts london
+get_favorite_coordinates london

@@ -1,0 +1,10 @@
+Steps required
+1.) Generate API key for weatherapi.com, and enter it into the template .env file.
+2.) Run run_docker.sh script
+
+Since the SQLAlchemy database is initialized in app.py, through the running of the docker script, everything needed should theoretically be loaded on at startup.
+
+Variables defined in .env
+API_KEY=
+DB_URI=sqlite:///users.db
+CREATE_DB=true    
