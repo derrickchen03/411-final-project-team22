@@ -270,3 +270,4 @@ add_favorite london
 get_all_favorites
 get_favorite_alerts london
 get_favorite_coordinates london
+get_all_favorites
