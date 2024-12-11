@@ -2,6 +2,7 @@ import pytest
 import requests
 import os
 import json
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 from weather.models.favorites_manager import FavoritesModel
@@ -98,7 +99,7 @@ def favorite_coordinates():
 
 def test_add_favorite(favorites_model):
     """testing adding a location to the favorites dictionary."""
-    favorites_model.add_favorite("Boston", 32.0, 12.0, 3.5, 20)
+    favorites_model.add_favorite("Boston", 32.4, 12.3, 3.5, 20)
     assert len(favorites_model.favorites) == 1
     assert favorites_model.favorites[0] == 'Boston'
     
@@ -205,9 +206,6 @@ def test_get_favorite_next_day_forecast(favorites_model, favorite_forecast):
     # Call the function and verify the result
     forecast = favorites_model.get_favorite_next_day_forecast("Boston")
     assert forecast == favorite_forecast, "Expected get_favorite_next_day_forecast to return the correct weather dictionary."
-
-def test_get_all_favorites_next_day_forecast(favorites_model):
-    pass
 
 def test_get_favorite_alerts(favorites_model, favorite_alerts):
     """Test that get_favorite_alerts gets the alerts for the location."""

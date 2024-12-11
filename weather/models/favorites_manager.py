@@ -55,7 +55,7 @@ class FavoritesModel:
         humidity = weather['humidity']
         return temp, wind, precipitation, humidity       
 
-    def add_favorite(self, location: str, temp: float = None, wind: float = None, precipitation: float = None, humidity: int = None) -> None:
+    def add_favorite(self, location: str, temp: float, wind: float = None, precipitation: float = None, humidity: int = None) -> None:
 
         """Initializes the FavoritesModel with an empty list of favorites."""
         self.favorites: dict[str, Any] = {}  # dictionary of favorite locations
@@ -76,13 +76,13 @@ class FavoritesModel:
         
         
 
-        if not isinstance(temp, float) or temp != None:
+        if not isinstance(temp, float) or temp == None:
             raise ValueError(f"Invalid temperature: {temp}, should be a float.")
-        if not isinstance(wind, float) or wind != None:
+        if not isinstance(wind, float) or wind == None:
             raise ValueError(f"Invalid wind: {wind}, should be a float.")
-        if not isinstance(precipitation, float) or precipitation != None:
+        if not isinstance(precipitation, float) or precipitation == None:
             raise ValueError(f"Invalid precipitation: {precipitation}, should be a float.")
-        if not isinstance(humidity, int) or humidity != None:
+        if not isinstance(humidity, int) or humidity == None:
             raise ValueError(f"Invalid humidity: {humidity}, should be an int.")
         
 
