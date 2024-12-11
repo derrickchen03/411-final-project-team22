@@ -1,0 +1,2 @@
+we were unable to get the db connection to user account working, though we did research and asked other groups
+thus, smoke tests and unit tests were only able to be tested for the favorites_model (api model)
