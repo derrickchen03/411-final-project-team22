@@ -289,7 +289,7 @@ def get_all_favorites_current_weather() -> Response:
         app.logger.error("Error retrieving temperatures for all locations in favorites")
         return make_response(jsonify({'error': str(e)}), 500)
     
-@app.route('/api/get-favorite-historical/<str:location>', methods = ['GET'])
+@app.route('/api/get-favorites-historical/<str:location>', methods = ['GET'])
 def get_favorite_historical(location: str) -> Response:
     """
     Route to get the historical weather for a favorite location.
@@ -378,32 +378,6 @@ def get_all_favorites() -> Response:
         return make_response(jsonify({'status': 'success', 'favorite list': fav_list}))
     except Exception as e:
         app.logger.error("Error retrieving list of locations in favorites.")
-        return make_response(jsonify({'error': str(e)}), 500)
-    
-@app.route('api/get-favorite-historical/<str:location>', methods = ['GET'])
-def get_historical_favorite(location) -> Response:
-    """
-    Route to get the last 5 day historical data for a favorite location.
-
-    Path Paramter:
-        location (str): the location whose forecast will be retrieved.
-    Returns:
-        JSON response with a dictionary of the historical temps, windspeed, precipitation, and humidity for the past 5 days.
-
-    Raises:
-        400 error if input validation fails.
-        500 error if there is an issue retrieving the weather.
-    """
-    try:
-        app.logger.info(f"Retreiving historical data for {location}")
-        
-        if not location:
-            return make_response(jsonify({'error': 'Location is required'}), 400)
-        
-        weather = favorites_manager.get_favorite_historical(location)
-        return make_response(jsonify({'status': 'success', 'historical_data': weather}))
-    except Exception as e:
-        app.logger.error(f"Error retrieving historical data for location: {location}")
         return make_response(jsonify({'error': str(e)}), 500)
     
 @app.route('api/get-favorite-alerts/<str:location>', methods = ['GET'])

@@ -136,7 +136,7 @@ Example Request:
     }
 Example Response:
     {
-        "'status': 'success', 'location': Boston",
+        "'status': 'success', 'location': 'Boston'",
         "status": "200"
     }
 ```
@@ -157,7 +157,7 @@ Example Request:
     }
 Example Response:
     {
-        "'status': 'success', 'weather': DICT",
+        "'status': 'success', 'weather': [('temp', 34.0), ('wind', 4.0), ('precipitation', 0.0), ('humidity', 100)]",
         "status": "200"
     }
 ```
@@ -175,7 +175,7 @@ Response Format: JSON
 Example Request:
 Example Response:
     {
-        "'status': 'success', 'favorite weather': DICT",
+        "'status': 'success', 'favorite weather': [[('temp', 34.0), ('wind', 4.0), ('precipitation', 0.0), ('humidity', 100)], [('temp', 28.0), ('wind', 1.0), ('precipitation', 1.0), ('humidity', 10)]]",
         "status": "200"
     }
 ```
@@ -196,7 +196,7 @@ Example Request:
     }
 Example Response:
     {
-        "'status': 'success', 'historical weather': DICT",
+        "'status': 'success', 'historical weather': [('temp', 38.0), ('wind', 13.2), ('precipitation', 0.06), ('humidity', 96)]",
         "status": "200"
     }
 ```
@@ -217,7 +217,7 @@ Example Request:
     }
 Example Response:
     {
-        "'status': 'success', 'forecast': DICT",
+        "'status': 'success', 'forecast': ["date": '2024-12-10', "max_temp": 39.0, "min_temp": 34]",
         "status": "200"
     }
 ```
