@@ -1,6 +1,10 @@
 import pytest
-
 from sqlalchemy.exc import IntegrityError
+from flask import Flask
+import os
+from app import create_app
+from config import TestConfig
+from db import db
 
 from weather.models.account_model import User
 
@@ -12,15 +16,46 @@ def sample_user():
         "password": "securepassword123"
     }
 
+"""@pytest.fixture
+def session():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URI")
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app)
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            print(e)
+    return app"""
 
+
+
+@pytest.fixture
+def app():
+    app = create_app(TestConfig)
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+@pytest.fixture
+def session(app):
+    with app.app_context():
+        yield db.session
 ##########################################################
 # User Creation
 ##########################################################
 
-def test_create_user(session_mocker, sample_user):
+def test_create_user(session, sample_user):
     """Test creating a new user with a unique username."""
     User.create_user(**sample_user)
-    user = session_mocker.query(User).filter_by(username=sample_user["username"]).first()
+    user = session.query(User).filter_by(username=sample_user["username"]).first()
     assert user is not None, "User should be created in the database."
     assert user.username == sample_user["username"], "Username should match the input."
     assert len(user.salt) == 32, "Salt should be 32 characters (hex)."
