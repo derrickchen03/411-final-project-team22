@@ -198,3 +198,37 @@ get_all_favorites() {
     exit 1
   fi
 }
+
+get_favorite_alerts() {
+  location=$1
+
+  echo "Getting alerts from a favorite location: ($location)..."
+  response=$(curl -s -X GET "$BASE_URL/get-favorite-alerts/$location")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Alerts for ($location) retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Alerts JSON (Favorite Location $location):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get alerts for favorite location ($location)."
+    exit 1
+  fi
+}
+
+get_favorite_coordinates() {
+  location=$1
+
+  echo "Getting historical weather from a favorite location: ($location)..."
+  response=$(curl -s -X GET "$BASE_URL/get-favorite-coordinates/$location")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Coordinates for ($location) retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Coordinates JSON (Favorite Location $location):"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get alerts for favorite location ($location)."
+    exit 1
+  fi
+}
