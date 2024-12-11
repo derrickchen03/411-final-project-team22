@@ -1,6 +1,10 @@
 import pytest
-
 from sqlalchemy.exc import IntegrityError
+from flask import Flask
+import os
+from app import create_app
+from config import TestConfig
+from db import db
 
 from weather.models.account_model import User
 
@@ -12,6 +16,38 @@ def sample_user():
         "password": "securepassword123"
     }
 
+"""@pytest.fixture
+def session():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URI")
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app)
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            print(e)
+    return app"""
+
+
+
+@pytest.fixture
+def app():
+    app = create_app(TestConfig)
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+@pytest.fixture
+def session(app):
+    with app.app_context():
+        yield db.session
 
 ##########################################################
 # User Creation
@@ -26,7 +62,7 @@ def test_create_user(session, sample_user):
     assert len(user.salt) == 32, "Salt should be 32 characters (hex)."
     assert len(user.password) == 64, "Password should be a 64-character SHA-256 hash."
 
-def test_create_duplicate_user(session, sample_user):
+def test_create_duplicate_user(session_mocker, sample_user):
     """Test attempting to create a user with a duplicate username."""
     User.create_user(**sample_user)
     with pytest.raises(ValueError, match="User with username 'testuser' already exists"):
@@ -36,17 +72,17 @@ def test_create_duplicate_user(session, sample_user):
 # User Authentication
 ##########################################################
 
-def test_check_password_correct(session, sample_user):
+def test_check_password_correct(session_mocker, sample_user):
     """Test checking the correct password."""
     User.create_user(**sample_user)
     assert User.check_password(sample_user["username"], sample_user["password"]) is True, "Password should match."
 
-def test_check_password_incorrect(session, sample_user):
+def test_check_password_incorrect(session_mocker, sample_user):
     """Test checking an incorrect password."""
     User.create_user(**sample_user)
     assert User.check_password(sample_user["username"], "wrongpassword") is False, "Password should not match."
 
-def test_check_password_user_not_found(session):
+def test_check_password_user_not_found(session_mocker):
     """Test checking password for a non-existent user."""
     with pytest.raises(ValueError, match="User nonexistentuser not found"):
         User.check_password("nonexistentuser", "password")
@@ -55,14 +91,14 @@ def test_check_password_user_not_found(session):
 # Update Password
 ##########################################################
 
-def test_update_password(session, sample_user):
+def test_update_password(session_mocker, sample_user):
     """Test updating the password for an existing user."""
     User.create_user(**sample_user)
     new_password = "newpassword456"
     User.update_password(sample_user["username"], new_password)
     assert User.check_password(sample_user["username"], new_password) is True, "Password should be updated successfully."
 
-def test_update_password_user_not_found(session):
+def test_update_password_user_not_found(session_mocker):
     """Test updating the password for a non-existent user."""
     with pytest.raises(ValueError, match="User nonexistentuser not found"):
         User.update_password("nonexistentuser", "newpassword")
@@ -72,14 +108,14 @@ def test_update_password_user_not_found(session):
 # Delete User
 ##########################################################
 
-def test_delete_user(session, sample_user):
+def test_delete_user(session_mocker, sample_user):
     """Test deleting an existing user."""
     User.create_user(**sample_user)
     User.delete_user(sample_user["username"])
-    user = session.query(User).filter_by(username=sample_user["username"]).first()
+    user = User.query.filter_by(username=sample_user["username"]).first()
     assert user is None, "User should be deleted from the database."
 
-def test_delete_user_not_found(session):
+def test_delete_user_not_found(session_mocker):
     """Test deleting a non-existent user."""
     with pytest.raises(ValueError, match="User nonexistentuser not found"):
         User.delete_user("nonexistentuser")
